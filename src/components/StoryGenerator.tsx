@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface StoryGeneratorProps {
-  onGenerateStories: () => void;
+  onGenerateStories: (genres: string[], childName?: string) => void;
   isGenerating: boolean;
   hasPhoto: boolean;
 }
@@ -28,6 +30,7 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({
   hasPhoto,
 }) => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [childName, setChildName] = useState("");
 
   const toggleGenre = (genre: string) => {
     setSelectedGenres(
@@ -42,11 +45,32 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({
     <div className="bg-white rounded-2xl p-6 shadow-lg space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Создать волшебные истории
+          Создать персональные истории
         </h2>
         <p className="text-gray-600">
-          Выберите жанры и создайте 10 уникальных историй для вашего ребенка
+          Ваш ребенок станет главным героем каждой истории
         </p>
+      </div>
+
+      {/* Имя ребенка */}
+      <div className="space-y-2">
+        <Label
+          htmlFor="childName"
+          className="text-sm font-medium text-gray-700"
+        >
+          Имя ребенка (необязательно)
+        </Label>
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            id="childName"
+            type="text"
+            placeholder="Как зовут вашего героя?"
+            value={childName}
+            onChange={(e) => setChildName(e.target.value)}
+            className="pl-10"
+          />
+        </div>
       </div>
 
       <div>
@@ -72,27 +96,33 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({
       </div>
 
       <Button
-        onClick={onGenerateStories}
+        onClick={() => onGenerateStories(selectedGenres, childName)}
         disabled={!hasPhoto || isGenerating || selectedGenres.length === 0}
         className="w-full bg-primary hover:bg-primary/90 h-12 text-lg font-semibold"
       >
         {isGenerating ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Создаю истории...
+            Создаю персональные истории...
           </>
         ) : (
           <>
             <Sparkles className="mr-2 h-5 w-5" />
-            Создать 10 историй
+            Создать истории с моим героем
           </>
         )}
       </Button>
 
       {!hasPhoto && (
         <p className="text-sm text-amber-600 text-center bg-amber-50 p-3 rounded-lg">
-          Сначала загрузите фото ребенка
+          Сначала загрузите фото ребенка для персонализации
         </p>
+      )}
+
+      {hasPhoto && (
+        <div className="text-sm text-green-600 text-center bg-green-50 p-3 rounded-lg">
+          ✨ Фото загружено! Готов создать истории с вашим героем
+        </div>
       )}
     </div>
   );

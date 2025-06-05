@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import PhotoUpload from "@/components/PhotoUpload";
 import StoryGenerator from "@/components/StoryGenerator";
 import StoryGallery from "@/components/StoryGallery";
+import {
+  generatePersonalizedStories,
+  type GeneratedStory,
+} from "@/services/storyService";
 
 interface Story {
   id: string;
@@ -13,74 +17,31 @@ interface Story {
 
 const Index = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const [stories, setStories] = useState<Story[]>([]);
+  const [stories, setStories] = useState<GeneratedStory[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateMockStories = async () => {
+  const handleGenerateStories = async (
+    genres: string[],
+    childName?: string,
+  ) => {
+    if (!selectedPhoto) return;
+
     setIsGenerating(true);
 
-    // Имитация API запроса
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    try {
+      const generatedStories = await generatePersonalizedStories({
+        photo: selectedPhoto,
+        genres,
+        childName,
+      });
 
-    const mockStories: Story[] = [
-      {
-        id: "1",
-        title: "Приключения в Волшебном лесу",
-        content:
-          "Маленький герой отправляется в удивительное путешествие через заколдованный лес, где встречает говорящих животных и узнает секрет древней магии...",
-        genre: "Сказка",
-        imageUrl:
-          "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
-      },
-      {
-        id: "2",
-        title: "Космическое путешествие",
-        content:
-          "На своем волшебном корабле наш герой летит к далёким звёздам, чтобы помочь инопланетным друзьям найти потерянную планету...",
-        genre: "Фантастика",
-        imageUrl:
-          "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=400&h=300&fit=crop",
-      },
-      {
-        id: "3",
-        title: "Тайна подводного замка",
-        content:
-          "Погружаясь в глубины океана, маленький исследователь обнаруживает подводный замок и встречает морских обитателей...",
-        genre: "Приключения",
-        imageUrl:
-          "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop",
-      },
-      {
-        id: "4",
-        title: "Дружба с драконом",
-        content:
-          "В далёкой стране наш герой встречает доброго дракона, который учит его летать и показывает красоты небесного мира...",
-        genre: "Дружба",
-        imageUrl:
-          "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop",
-      },
-      {
-        id: "5",
-        title: "Спасение волшебного леса",
-        content:
-          "Когда злой колдун угрожает волшебному лесу, только наш маленький герой может собрать всех лесных жителей и спасти их дом...",
-        genre: "Магия",
-        imageUrl:
-          "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
-      },
-      {
-        id: "6",
-        title: "Приключения в стране игрушек",
-        content:
-          "Попав в удивительную страну, где все игрушки оживают, наш герой помогает им решить важную проблему и находит новых друзей...",
-        genre: "Семья",
-        imageUrl:
-          "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop",
-      },
-    ];
-
-    setStories(mockStories);
-    setIsGenerating(false);
+      setStories(generatedStories);
+    } catch (error) {
+      console.error("Ошибка генерации историй:", error);
+      // В реальном приложении здесь была бы обработка ошибок
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -108,13 +69,12 @@ const Index = () => {
         <section className="text-center space-y-6">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-              Волшебные истории с вашим
-              <span className="text-primary block">маленьким героем</span>
+              Ваш ребенок — герой
+              <span className="text-primary block">волшебных историй</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Загрузите фото ребёнка и получите 10 уникальных
-              персонализированных историй с изображениями, где ваш малыш —
-              главный герой приключений
+              Загрузите фото ребёнка и получите персонализированные истории, где
+              ваш малыш станет главным героем удивительных приключений
             </p>
           </div>
         </section>
@@ -130,7 +90,7 @@ const Index = () => {
         {/* Generator Section */}
         <section>
           <StoryGenerator
-            onGenerateStories={generateMockStories}
+            onGenerateStories={handleGenerateStories}
             isGenerating={isGenerating}
             hasPhoto={!!selectedPhoto}
           />
